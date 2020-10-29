@@ -1,0 +1,75 @@
+@charset "utf-8";
+@import "variables";
+@import "node_modules/bulma/bulma";
+
+$fa-font-path: "/node_modules/@fortawesome/fontawesome-free/webfonts";
+@import "node_modules/@fortawesome/fontawesome-free/scss/fontawesome";
+@import "node_modules/@fortawesome/fontawesome-free/scss/solid";
+
+html {
+  overflow-y: unset;
+}
+
+#wrapper {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+
+  > header {
+    background-color: $grey-dark;
+  }
+
+  > section {
+    flex: 1;
+  }
+
+  > footer {
+    .column {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.section {
+  padding: 1.5rem;
+}
+
+.breadcrumb ul li > span {
+  display: flex;
+  justify-content: center;
+  padding: 0 0.75em;
+}
+
+h1, h2, h3, h4 {
+  margin-top: 1rem;
+
+  .button {
+    vertical-align: text-top;
+  }
+}
+
+.content .hierarchy-entry {
+  & ul, & ul ul {
+    margin-top: 0.25rem;
+  }
+}
+
+.icon.flag-rainbow {
+  background-image: url("/src/icons/flag_rainbow.png");
+  background-size: cover;
+}
+
+.icon.flag-nonbinary {
+  background-image: url("/src/icons/flag_nonbinary.png");
+  background-size: cover;
+}
+
+.icon.flag-trans {
+  background-image: url("/src/icons/flag_trans.png");
+  background-size: cover;
+}
+
+.icon.flag-asexuality {
+  background-image: url("/src/icons/flag_asexuality.png");
+  background-size: cover;
+}

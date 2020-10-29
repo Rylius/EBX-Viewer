@@ -1,0 +1,44 @@
+@charset "utf-8";
+@import "node_modules/bulma/sass/utilities/initial-variables";
+@import "node_modules/bulma/sass/utilities/functions";
+
+// Bulma
+
+$orange: #e14d43;
+$grey-darker: #121212;
+$grey-dark: #1e1e1e;
+
+$scheme-main: $grey-darker;
+$border: $grey;
+
+$text: $white;
+$text-light: $grey-lightest;
+$text-strong: $grey-lighter;
+
+$link: $orange;
+$link-hover: $yellow;
+$link-hover-border: $yellow;
+$link-active: $grey-lighter;
+$link-active-border: $yellow;
+$link-focus: $yellow;
+$link-focus-border: $grey-lighter;
+
+$button-background-color: $grey-dark;
+$button-hover-color: $yellow;
+$button-hover-border-color: $yellow;
+$button-focus-color: $text-light;
+$button-focus-border-color: $orange;
+$button-active-color: $white;
+
+$footer-background-color: $grey-dark;
+$footer-padding: 1rem 2rem;
+
+// Graph
+
+$node-background-color: #2d2d2d;
+$node-border-color: #1a1a1a;
+
+$connection-color: #131313;
+$connection-event-color: #940000;
+$connection-property-color: #004c88;
+$connection-link-color: #ffc62f;
