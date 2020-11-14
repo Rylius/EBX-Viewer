@@ -41,6 +41,10 @@ declare namespace EBX {
             $ref: true;
         }
 
+        interface Guid {
+            'fb::Guid': string;
+        }
+
         interface Reference {
             $partitionGuid: string;
             $instanceGuid: string;

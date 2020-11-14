@@ -9,6 +9,14 @@ export const typeNameMappings: { [type: string]: string } = {
     'GUID': 'Guid',
 };
 
+export function parseGuid(json: EBX.JSON.Guid | string): Frostbite.Guid {
+    if (typeof json === 'string') {
+        return json;
+    } else {
+        return json['fb::Guid'];
+    }
+}
+
 export class LinearTransform {
 
     public readonly right: Vec3 = new Vec3();
