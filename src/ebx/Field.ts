@@ -42,7 +42,7 @@ function parseValue(json: EBX.JSON.Field<any>): any {
         return new Reference(json.$value.$partitionGuid.toUpperCase(), json.$value.$instanceGuid.toUpperCase());
     }
 
-    if (typeof json.$value === 'object') {
+    if (json.$value !== null && typeof json.$value === 'object') {
         const fields: { [field: string]: Field<any> } = {};
         Object.keys(json.$value).map(name => Field.fromJSON(name, {...json.$value[name]})).forEach(field => fields[field.name] = field);
         return fields;
