@@ -33,6 +33,7 @@ import LinearTransformProperty from './LinearTransformProperty.vue';
 import ArrayProperty from './ArrayProperty.vue';
 import ReferenceProperty from './ReferenceProperty.vue';
 import ObjectProperty from './ObjectProperty.vue';
+import AntRefProperty from './AntRefProperty.vue';
 
 export default Vue.extend({
     name: 'Property',
@@ -66,9 +67,7 @@ export default Vue.extend({
                 case 'LinearTransform':
                     return LinearTransformProperty;
                 case 'AntRef':
-                    // TODO assetId
-                    // Characters/Soldiers/MpSoldier.json
-                    return ObjectProperty;
+                    return AntRefProperty;
                 default:
                     break;
             }
