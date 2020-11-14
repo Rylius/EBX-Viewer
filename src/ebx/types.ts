@@ -57,3 +57,28 @@ export class Vec3 {
     }
 
 }
+
+export class Vec4 {
+
+    public x: number = 0.0;
+    public y: number = 0.0;
+    public z: number = 0.0;
+    public w: number = 0.0;
+
+    set(x: number, y: number, z: number, w: number): Vec4 {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
+        return this;
+    }
+
+    copy(other: Vec4): Vec4 {
+        return this.set(other.x, other.y, other.z, other.w);
+    }
+
+    static fromJSON(json: EBX.JSON.Vec4): Vec4 {
+        return new Vec4().set(json.x.$value, json.y.$value, json.z.$value, json.w.$value);
+    }
+
+}

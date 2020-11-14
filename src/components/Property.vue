@@ -28,6 +28,7 @@ import Field from '../ebx/Field';
 
 import DefaultProperty from './DefaultProperty.vue';
 import Vec3Property from './Vec3Property.vue';
+import Vec4Property from './Vec4Property.vue';
 import LinearTransformProperty from './LinearTransformProperty.vue';
 import ArrayProperty from './ArrayProperty.vue';
 import ReferenceProperty from './ReferenceProperty.vue';
@@ -60,6 +61,8 @@ export default Vue.extend({
             switch (this.field.type) {
                 case 'Vec3':
                     return Vec3Property;
+                case 'Vec4':
+                    return Vec4Property;
                 case 'LinearTransform':
                     return LinearTransformProperty;
                 case 'AntRef':
@@ -83,6 +86,7 @@ export default Vue.extend({
         ReferenceProperty,
         ArrayProperty,
         Vec3Property,
+        Vec4Property,
         LinearTransformProperty,
     },
 });

@@ -58,5 +58,9 @@ declare namespace EBX {
             y: Field<number>;
             z: Field<number>;
         }
+
+        interface Vec4 extends Vec3 {
+            w: Field<number>;
+        }
     }
 }

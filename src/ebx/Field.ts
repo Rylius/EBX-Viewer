@@ -1,9 +1,10 @@
-import {LinearTransform, Vec3} from './types';
+import {LinearTransform, Vec3, Vec4} from './types';
 import Reference from './Reference';
 
 const customDeserializers: { [type: string]: (value: any) => any } = {
     'LinearTransform': LinearTransform.fromJSON,
     'Vec3': Vec3.fromJSON,
+    'Vec4': Vec4.fromJSON,
 };
 
 function normalizeFieldName(name: string): string {
