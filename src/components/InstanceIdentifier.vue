@@ -110,7 +110,7 @@
             ({{ instance.fields.teamId.enumValue || instance.fields.teamId.value }})
         </template>
         <template v-else-if="instance.fields.id">
-            ({{ instance.fields.id.enumValue || instance.fields.id.value }})
+            ({{ instance.fields.id.enumValue || resolveEvent(instance.fields.id.value) }})
         </template>
         <template v-else-if="instance.fields.rigidBodyType">
             ({{ instance.fields.rigidBodyType.enumValue || instance.fields.rigidBodyType.value }})
