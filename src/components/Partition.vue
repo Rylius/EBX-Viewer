@@ -20,7 +20,7 @@
                 <div class="content">
                     <ul>
                         <li>
-                            <hierarchy-entry :registry="registry" :instance="partition.primaryInstance"></hierarchy-entry>
+                            <hierarchy-entry :registry="registry" :instance="partition.primaryInstance" :parent="null"></hierarchy-entry>
                         </li>
                     </ul>
                 </div>

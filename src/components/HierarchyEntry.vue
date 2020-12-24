@@ -5,8 +5,13 @@
         </router-link>
         <instance-identifier :registry="registry" :instance="instance"></instance-identifier>
         <ul v-if="childInstances.length">
-            <li v-for="instance in childInstances">
-                <hierarchy-entry :registry="registry" :instance="instance"></hierarchy-entry>
+            <li v-for="child in childInstances">
+                <template v-if="child.partition.guid === instance.partition.guid">
+                    <hierarchy-entry :registry="registry" :instance="child" :parent="instance"></hierarchy-entry>
+                </template>
+                <template v-else>
+                    <reference :registry="registry" :reference="buildInstanceReference(child)"></reference>
+                </template>
             </li>
         </ul>
     </div>
@@ -90,6 +95,10 @@ export default Vue.extend({
             type: Object as PropType<Instance>,
             required: true,
         },
+        parent: {
+            type: Object as PropType<Instance>,
+            required: false,
+        },
     },
     data(): { childInstances: Array<Instance> } {
         return {
@@ -97,6 +106,10 @@ export default Vue.extend({
         };
     },
     async mounted() {
+        if (this.parent && this.parent.partition.guid !== this.instance.partition.guid) {
+            return;
+        }
+
         const references: Array<Reference> = [];
 
         for (const fieldName of referenceFields) {
@@ -121,6 +134,11 @@ export default Vue.extend({
             .forEach(partition => partitions[partition.guid] = partition);
 
         this.childInstances.push(...validReferences.map(reference => partitions[reference.partitionGuid].instances[reference.instanceGuid]));
+    },
+    methods: {
+        buildInstanceReference(instance: Instance): Reference {
+            return new Reference(instance.partition.guid, instance.guid);
+        },
     },
 });
 </script>
