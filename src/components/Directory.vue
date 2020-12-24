@@ -11,7 +11,7 @@
         <div v-if="directories || files">
             <div class="content">
                 <ul>
-                    <li v-for="(dir, name) in directories">
+                    <li v-for="name in sortedDirectories">
                         <router-link :to="`/view/${game}${cleanPath}${name}`">
                             <span class="icon"><i class="fas fa-folder"/></span>
                             {{ name }}
@@ -22,7 +22,7 @@
 
             <div class="content">
                 <ul>
-                    <li v-for="file in files">
+                    <li v-for="file in sortedFiles">
                         <router-link :to="`/view/${game}${cleanPath}${file}`">
                             <span class="icon"><i class="fas fa-file-alt"/></span>
                             {{ file | removeExt }}
@@ -52,6 +52,10 @@ function resolve(data: any, path: string): { [dir: string]: string } {
     return current;
 }
 
+function sortFile(a: string, b: string): number {
+    return a.localeCompare(b, 'en', {numeric: true}) || b.length - a.length;
+}
+
 export default Vue.extend({
     name: 'Directory',
     props: {
@@ -69,6 +73,24 @@ export default Vue.extend({
         };
     },
     computed: {
+        sortedDirectories(): Array<string> {
+            const names: Array<string> = [];
+
+            if (this.directories) {
+                names.push(...Object.keys(this.directories).sort(sortFile));
+            }
+
+            return names;
+        },
+        sortedFiles(): Array<string> {
+            const names: Array<string> = [];
+
+            if (this.files) {
+                names.push(...this.files.sort(sortFile));
+            }
+
+            return names;
+        },
         cleanPath(): string {
             let path = this.path;
             if (!path.startsWith('/')) {
