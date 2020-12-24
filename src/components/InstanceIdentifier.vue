@@ -70,7 +70,7 @@
                 <reference :registry="registry" :reference="instance.fields.shader.value"
                            :link="referenceLinks"></reference>
             </template>
-            <template v-else>
+            <template v-else-if="instance.fields.shader.value.shader.value">
                 <!-- SurfaceShaderInstanceDataStruct is nested -->
                 <reference :registry="registry" :reference="instance.fields.shader.value.shader.value"
                            :link="referenceLinks"></reference>
