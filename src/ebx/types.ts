@@ -9,6 +9,17 @@ export const typeNameMappings: { [type: string]: string } = {
     'GUID': 'Guid',
 };
 
+export function unsignedToSigned(number: number, bits: 8 | 16 | 32): number {
+    let msb = 1 << (bits - 1);
+
+    let mask = ~((~0) << (bits - 1));
+    if (number & msb) {
+        return (number & mask) + msb * Math.sign(msb) * -1;
+    } else {
+        return number;
+    }
+}
+
 export function parseGuid(json: EBX.JSON.Guid | string): Frostbite.Guid {
     if (typeof json === 'string') {
         return json;

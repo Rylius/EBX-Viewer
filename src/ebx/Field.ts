@@ -1,4 +1,4 @@
-import {LinearTransform, parseGuid, Vec3, Vec4} from './types';
+import {LinearTransform, parseGuid, unsignedToSigned, Vec3, Vec4} from './types';
 import Reference from './Reference';
 
 const customDeserializers: { [type: string]: (value: any) => any } = {
@@ -6,7 +6,13 @@ const customDeserializers: { [type: string]: (value: any) => any } = {
     'Vec3': Vec3.fromJSON,
     'Vec4': Vec4.fromJSON,
     'GUID': parseGuid,
+    'UInt16': parseUnsignedValue(16),
+    'UInt32': parseUnsignedValue(32),
 };
+
+function parseUnsignedValue(bits: 8 | 16 | 32): (value: any) => number {
+    return (value) => unsignedToSigned(value, bits);
+}
 
 function normalizeFieldName(name: string): string {
     // FIXME Clean this up
