@@ -178,7 +178,7 @@ export default Vue.extend({
                 fit: false,
                 // @ts-ignore added by cytoscape-klay
                 transform(node: cytoscape.NodeSingular, pos: cytoscape.Position) {
-                    return {x: pos.x * 10, y: pos.y * 5};
+                    return {x: pos.x / 2, y: pos.y / 5};
                 },
 
                 // dagre
@@ -188,12 +188,19 @@ export default Vue.extend({
                 spacingFactor: 1.5,
 
                 klay: {
+                    compactComponents: true,
+                    // cycleBreaking: 'INTERACTIVE',
                     direction: 'RIGHT',
                     edgeRouting: 'ORTHOGONAL',
-                    compactComponents: true,
+                    edgeSpacingFactor: 0.25,
+                    feedbackEdges: true,
+                    fixedAlignment: 'BALANCED',
                     inLayerSpacingFactor: 2,
                     layoutHierarchy: true,
+                    linearSegmentsDeflectionDampening: 0.9,
+                    nodePlacement: 'LINEAR_SEGMENTS',
                     routeSelfLoopInside: true,
+                    spacing: 600 + 100, // width of nodes plus padding
                     // thoroughness: 50,
                 },
 
