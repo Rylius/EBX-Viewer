@@ -38,6 +38,13 @@ export default Vue.extend({
 
 .default-node {
   min-width: 600px;
+  max-width: 600px;
+
+  h3:not(:hover) {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
 }
 
 </style>
