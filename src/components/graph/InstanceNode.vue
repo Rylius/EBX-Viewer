@@ -1,8 +1,9 @@
 <template>
-    <div class="node content" :class="[selected()]">
+    <div class="node content"
+         :class="[selected(), `type-${instance.type}`, foreignPartition ? 'foreign-partition': '']">
         <component :is="nodeComponent" :node="node" :instance="instance">
             <template v-slot:partition>
-                <p v-if="partition !== node.data.sourcePartition">
+                <p v-if="foreignPartition">
                     <a :href="`/view/${node.data.registry.game}/${partition.file}.json`" target="_blank">
                         {{ partition.name }}
                     </a>
@@ -96,6 +97,9 @@ export default Vue.extend({
 
             return DefaultNode;
         },
+        foreignPartition(): boolean {
+            return this.partition !== this.node.data.sourcePartition;
+        },
     },
     components: {
         Socket,
@@ -128,14 +132,33 @@ export default Vue.extend({
 
   box-shadow: change-color($node-border-color, $alpha: 0.5) 0 0 10px 10px;
 
-  &.selected {
-    background-color: lighten(#414141, 5%);
-  }
-
   ul {
     list-style: none;
     margin: 0;
   }
+
+  &.type-InterfaceDescriptorData {
+    background-color: $node-type-interface-descriptor-data-color;
+    border-color: darken($node-type-interface-descriptor-data-color, 10%);
+
+    &.selected {
+      background-color: lighten($node-type-interface-descriptor-data-color, 10%);
+    }
+  }
+
+  &.foreign-partition {
+    background-color: $node-foreign-partition-color;
+    border-color: darken($node-foreign-partition-color, 10%);
+
+    &.selected {
+      background-color: lighten($node-foreign-partition-color, 10%);
+    }
+  }
+
+  &.selected {
+    background-color: lighten(#414141, 5%);
+  }
+
 }
 
 </style>
