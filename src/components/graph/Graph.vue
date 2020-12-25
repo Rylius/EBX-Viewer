@@ -10,6 +10,7 @@
 import Vue, {PropType} from 'vue';
 
 import Rete, {Input, Node, NodeEditor, Output, Socket} from 'rete';
+import {ConnectionView} from 'rete/types/view/connection';
 // Let's just say Rete's packaging is a mess and we're saving us a whole lot of trouble by doing this
 // @ts-ignore
 import ConnectionPlugin from '../../../lib/rete/connection-plugin.common';
@@ -53,6 +54,7 @@ export default Vue.extend({
         instanceInputs: { [guid: string]: { [key: string]: Input }; },
         instanceOutputs: { [guid: string]: { [key: string]: Output }; },
         connections: Array<{ output: Output, input: Input }>,
+        selectedNodes: Array<Node>,
     } {
         return {
             visible: true,
@@ -67,6 +69,7 @@ export default Vue.extend({
             instanceInputs: {},
             instanceOutputs: {},
             connections: [],
+            selectedNodes: [],
         };
     },
     computed: {
@@ -157,6 +160,27 @@ export default Vue.extend({
                 editor.selectNode(editor.nodes[0]);
             }
         }
+
+        const findNodeConnections = (node: Node) => ((node.getConnections()
+            .map(connection => editor.view.connections.get(connection))
+            .filter(view => view) as Array<ConnectionView>)
+            .map(view => view.el.querySelector('.connection'))
+            .filter(el => el) as Array<SVGElement>);
+
+        editor.on('selectnode', ({node, accumulate}) => {
+            if (!accumulate) {
+                this.selectedNodes.forEach(selectedNode => findNodeConnections(selectedNode).forEach(svg => svg.classList.remove('selected')));
+                this.selectedNodes.length = 0;
+            }
+
+            if (this.selectedNodes.includes(node)) {
+                return;
+            }
+
+            findNodeConnections(node).forEach(svg => svg.classList.add('selected'));
+
+            this.selectedNodes.push(node);
+        });
 
         this.$emit('nodes-changed', editor.nodes);
     },
@@ -448,6 +472,30 @@ $connection-link-color: #ffc62f;
     &.socket-input-link, &.socket-output-link {
       .main-path {
         stroke: $connection-link-color;
+      }
+    }
+
+    &.selected {
+      .main-path {
+        stroke: lighten($connection-color, 50%);
+      }
+
+      &.socket-input-event, &.socket-output-event {
+        .main-path {
+          stroke: lighten($connection-event-color, 50%);
+        }
+      }
+
+      &.socket-input-property, &.socket-output-property {
+        .main-path {
+          stroke: lighten($connection-property-color, 50%);
+        }
+      }
+
+      &.socket-input-link, &.socket-output-link {
+        .main-path {
+          stroke: lighten($connection-link-color, 30%);
+        }
       }
     }
   }
