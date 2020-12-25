@@ -1,8 +1,10 @@
 <template>
-    <div class="graph" :id="elementId">
+    <div class="graph-container">
         <div class="m-1">
-            <button class="button" @click="layout">Arrange</button>
+            <button class="button is-small" @click="layout">Arrange</button>
         </div>
+
+        <div class="graph" :id="elementId"></div>
     </div>
 </template>
 
@@ -446,9 +448,15 @@ $connection-event-color: #940000;
 $connection-property-color: #004c88;
 $connection-link-color: #ffc62f;
 
+.graph-container {
+  width: 100%;
+  height: 100%
+}
+
 .graph {
   width: 100%;
-  height: 100%;
+  height: 100%;;
+  position: absolute;
 
   background-color: #7A7A7A;
 

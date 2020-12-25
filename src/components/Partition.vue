@@ -44,7 +44,7 @@
                         </router-link>
                     </small>
                 </h3>
-                <div class="content graph">
+                <div class="content graph-wrapper">
                     <graph :partition="partition" :registry="registry" @nodes-changed="graphNodesChanged"></graph>
                 </div>
             </div>
@@ -155,9 +155,11 @@ export default Vue.extend({
 
 <style lang="scss" scoped>
 
-.graph {
+.graph-wrapper {
   width: 100%;
   min-height: 85vh;
+  position: relative;
+  margin-bottom: 3rem;
 }
 
 </style>
