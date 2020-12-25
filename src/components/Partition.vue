@@ -16,11 +16,19 @@
             <div v-if="partition.primaryInstance">
                 <h3 class="subtitle">
                     Hierarchy
+
+                    <button class="button is-small" v-if="hierarchyVisible" @click="hierarchyVisible = false">
+                        Hide
+                    </button>
+                    <button class="button is-small" v-else @click="hierarchyVisible = true">
+                        Show
+                    </button>
                 </h3>
-                <div class="content">
+                <div class="content" v-if="hierarchyVisible">
                     <ul>
                         <li>
-                            <hierarchy-entry :registry="registry" :instance="partition.primaryInstance" :parent="null"></hierarchy-entry>
+                            <hierarchy-entry :registry="registry" :instance="partition.primaryInstance"
+                                             :parent="null"></hierarchy-entry>
                         </li>
                     </ul>
                 </div>
@@ -29,6 +37,12 @@
             <div v-show="graphVisible">
                 <h3 class="subtitle">
                     Graph
+
+                    <small class="is-size-7">
+                        <router-link :to="`/view/${registry.game}/${partition.file}.json/graph`">
+                            Fullscreen
+                        </router-link>
+                    </small>
                 </h3>
                 <div class="content graph">
                     <graph :partition="partition" :registry="registry" @nodes-changed="graphNodesChanged"></graph>
@@ -75,6 +89,7 @@ export default Vue.extend({
         partition: Partition | null;
         activeInstance: string;
         types: { [type: string]: any };
+        hierarchyVisible: boolean;
         graphVisible: boolean;
     } {
         return {
@@ -82,6 +97,7 @@ export default Vue.extend({
             partition: null,
             activeInstance: '',
             types: {},
+            hierarchyVisible: true,
             graphVisible: true,
         };
     },
@@ -126,15 +142,6 @@ export default Vue.extend({
         },
     },
     methods: {
-        copyToClipboard(text: string) {
-            navigator.clipboard.writeText(text);
-        },
-        luaFindInstanceByGuid(partition: Partition, instance: Instance): string {
-            return `${instance.type}(ResourceManager:FindInstanceByGuid(Guid('${partition.guid}'), Guid('${instance.guid}')))`;
-        },
-        luaSearchForInstanceByGuid(instance: Instance): string {
-            return `${instance.type}(ResourceManager:SearchForInstanceByGuid(Guid('${instance.guid}')))`;
-        },
         graphNodesChanged(nodes: Array<any>): void {
             this.graphVisible = nodes.length > 0;
         },
