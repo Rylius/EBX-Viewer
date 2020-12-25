@@ -218,21 +218,22 @@ export default Vue.extend({
             }).run();
         },
 
-        createNode(instance: Instance): Node {
+        createNode(instance: Instance, id: string): Node {
             if (!this.editor || !this.cy) {
                 throw new Error('Cannot create nodes without editor or cytoscape core');
             }
 
             const node = new Node('instance');
+            node.data.id = id;
             node.data.instance = instance;
             node.data.sourcePartition = this.partition;
             node.data.registry = this.registry;
-            this.instanceNodes[instance.guid] = node;
-            this.instanceInputs[instance.guid] = {};
-            this.instanceOutputs[instance.guid] = {};
+            this.instanceNodes[id] = node;
+            this.instanceInputs[id] = {};
+            this.instanceOutputs[id] = {};
             this.editor.addNode(node);
 
-            this.cy.add({group: 'nodes', data: {id: instance.guid, label: instance.type}});
+            this.cy.add({group: 'nodes', data: {id, label: instance.type}});
 
             return node;
         },
@@ -247,21 +248,31 @@ export default Vue.extend({
             return instance;
         },
 
-        prepareNode(instance: Instance): Node {
-            const node = this.instanceNodes[instance.guid];
+        prepareNode(instance: Instance, usage: 'input' | 'output'): Node {
+            let id = instance.guid;
+            if (instance.type === 'InterfaceDescriptorData') {
+                // Split interface descriptors into two separate nodes
+                if (usage === 'input') {
+                    id += '-inputs';
+                } else if (usage === 'output') {
+                    id += '-outputs';
+                }
+            }
+
+            const node = this.instanceNodes[id];
             if (node) {
                 return node;
             }
 
-            return this.createNode(instance);
+            return this.createNode(instance, id);
         },
 
         prepareOutput(node: Node, key: string, title: string, socket: Socket): Output {
-            const instance = node.data.instance as Instance;
-            let output = this.instanceOutputs[instance.guid][key];
+            const nodeId = node.data.id as string;
+            let output = this.instanceOutputs[nodeId][key];
             if (!output) {
                 output = new Rete.Output(key, title, socket, true);
-                this.instanceOutputs[instance.guid][key] = output;
+                this.instanceOutputs[nodeId][key] = output;
                 node.addOutput(output);
             }
 
@@ -269,11 +280,11 @@ export default Vue.extend({
         },
 
         prepareInput(node: Node, key: string, title: string, socket: Socket): Input {
-            const instance = node.data.instance as Instance;
-            let input = this.instanceInputs[instance.guid][key];
+            const nodeId = node.data.id as string;
+            let input = this.instanceInputs[nodeId][key];
             if (!input) {
                 input = new Rete.Input(key, title, socket, true);
-                this.instanceInputs[instance.guid][key] = input;
+                this.instanceInputs[nodeId][key] = input;
                 node.addInput(input);
             }
 
@@ -291,8 +302,8 @@ export default Vue.extend({
                     group: 'edges',
                     data: {
                         id: `${output.key}-to-${input.key}`,
-                        source: (output.node?.data.instance as Instance).guid,
-                        target: (input.node?.data.instance as Instance).guid,
+                        source: output.node?.data.id as string,
+                        target: input.node?.data.id as string,
                     },
                 });
             }, 0);
@@ -304,31 +315,31 @@ export default Vue.extend({
                 throw new Error(`Invalid interface descriptor type '${instance.type}'`);
             }
 
-            // TODO Split into two nodes (input/output)
-            const node = this.prepareNode(instance);
+            const inputsNode = this.prepareNode(instance, 'input');
+            const outputsNode = this.prepareNode(instance, 'output');
 
             for (const inputEvent of instance.fields.inputEvents.value) {
                 const eventId = inputEvent.value.id.value;
                 const key = `event-input-${instance.guid}-${eventId}`;
-                this.prepareInput(node, key, `${this.resolveHash(eventId)}`, this.sockets.event);
+                this.prepareInput(inputsNode, key, `${this.resolveHash(eventId)}`, this.sockets.event);
             }
 
             for (const outputEvent of instance.fields.outputEvents.value) {
                 const eventId = outputEvent.value.id.value;
                 const key = `event-output-${instance.guid}-${eventId}`;
-                this.prepareOutput(node, key, `${this.resolveHash(eventId)}`, this.sockets.event);
+                this.prepareOutput(outputsNode, key, `${this.resolveHash(eventId)}`, this.sockets.event);
             }
 
             for (const inputLink of instance.fields.inputLinks.value) {
                 const fieldId = inputLink.value.id.value;
                 const key = `link-input-${instance.guid}-${fieldId}`;
-                this.prepareInput(node, key, `${this.resolveHash(fieldId)}`, this.sockets.link);
+                this.prepareInput(inputsNode, key, `${this.resolveHash(fieldId)}`, this.sockets.link);
             }
 
             for (const outputLink of instance.fields.outputLinks.value) {
                 const fieldId = outputLink.value.id.value;
                 const key = `link-output-${instance.guid}-${fieldId}`;
-                this.prepareOutput(node, key, `${this.resolveHash(fieldId)}`, this.sockets.link);
+                this.prepareOutput(outputsNode, key, `${this.resolveHash(fieldId)}`, this.sockets.link);
             }
 
             for (const field of instance.fields.fields.value) {
@@ -337,10 +348,10 @@ export default Vue.extend({
                 const source = field.value.accessType.enumValue === 'FieldAccessType_Source' || sourceAndTarget;
                 const target = field.value.accessType.enumValue === 'FieldAccessType_Target' || sourceAndTarget;
                 if (target) {
-                    this.prepareOutput(node, `property-output-${instance.guid}-${fieldId}`, `${this.resolveHash(fieldId)}`, this.sockets.property);
+                    this.prepareOutput(outputsNode, `property-output-${instance.guid}-${fieldId}`, `${this.resolveHash(fieldId)}`, this.sockets.property);
                 }
                 if (source) {
-                    this.prepareInput(node, `property-input-${instance.guid}-${fieldId}`, `${this.resolveHash(fieldId)}`, this.sockets.property);
+                    this.prepareInput(inputsNode, `property-input-${instance.guid}-${fieldId}`, `${this.resolveHash(fieldId)}`, this.sockets.property);
                 }
                 if (!source && !target) {
                     console.warn('Unhandled interface descriptor field', field.value);
@@ -350,13 +361,13 @@ export default Vue.extend({
 
         async createEventConnection(eventConnection: Field<any>): Promise<void> {
             const sourceInstance = await this.resolveInstance(eventConnection.value.source.value);
-            const sourceNode = this.prepareNode(sourceInstance);
+            const sourceNode = this.prepareNode(sourceInstance, 'output');
             const sourceEvent = eventConnection.value.sourceEvent.value.id.value;
             const sourceKey = `event-output-${sourceInstance.guid}-${sourceEvent}`;
             const output = this.prepareOutput(sourceNode, sourceKey, `${this.resolveHash(sourceEvent)}`, this.sockets.event);
 
             const targetInstance = await this.resolveInstance(eventConnection.value.target.value);
-            const targetNode = this.prepareNode(targetInstance);
+            const targetNode = this.prepareNode(targetInstance, 'input');
             const targetEvent = eventConnection.value.targetEvent.value.id.value;
             const targetKey = `event-input-${targetInstance.guid}-${targetEvent}`;
             const input = this.prepareInput(targetNode, targetKey, `${this.resolveHash(targetEvent)}`, this.sockets.event);
@@ -366,13 +377,13 @@ export default Vue.extend({
 
         async createPropertyConnection(propertyConnection: Field<any>): Promise<void> {
             const sourceInstance = await this.resolveInstance(propertyConnection.value.source.value);
-            const sourceNode = this.prepareNode(sourceInstance);
+            const sourceNode = this.prepareNode(sourceInstance, 'output');
             const sourceField = propertyConnection.value.sourceFieldId.value;
             const sourceKey = `property-output-${sourceInstance.guid}-${sourceField}`;
             const output = this.prepareOutput(sourceNode, sourceKey, `${this.resolveHash(sourceField)}`, this.sockets.property);
 
             const targetInstance = await this.resolveInstance(propertyConnection.value.target.value);
-            const targetNode = this.prepareNode(targetInstance);
+            const targetNode = this.prepareNode(targetInstance, 'input');
             const targetField = propertyConnection.value.targetFieldId.value;
             const targetKey = `property-input-${targetInstance.guid}-${targetField}`;
             const input = this.prepareInput(targetNode, targetKey, `${this.resolveHash(targetField)}`, this.sockets.property);
@@ -382,13 +393,13 @@ export default Vue.extend({
 
         async createLinkConnection(linkConnection: Field<any>): Promise<void> {
             const sourceInstance = await this.resolveInstance(linkConnection.value.source.value);
-            const sourceNode = this.prepareNode(sourceInstance);
+            const sourceNode = this.prepareNode(sourceInstance, 'input');
             const sourceField = linkConnection.value.sourceFieldId.value;
             const sourceKey = `link-input-${sourceInstance.guid}-${sourceField}`;
             const input = this.prepareInput(sourceNode, sourceKey, `${this.resolveHash(sourceField)}`, this.sockets.link);
 
             const targetInstance = await this.resolveInstance(linkConnection.value.target.value);
-            const targetNode = this.prepareNode(targetInstance);
+            const targetNode = this.prepareNode(targetInstance, 'output');
             const targetField = linkConnection.value.targetFieldId.value;
             const targetKey = `link-output-${targetInstance.guid}-${targetField}`;
             const output = this.prepareOutput(targetNode, targetKey, `${this.resolveHash(targetField)}`, this.sockets.link);
