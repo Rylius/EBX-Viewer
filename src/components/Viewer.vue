@@ -97,6 +97,9 @@ export default Vue.extend({
             const parts = path.split('/');
             parts.shift();
             parts.shift();
+            if (parts.length > 1 && parts[parts.length - 1] === 'graph') {
+                parts.pop();
+            }
             for (const part of parts) {
                 let name = part;
                 // Capitalize the game name

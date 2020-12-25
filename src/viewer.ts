@@ -14,6 +14,7 @@ import InstanceIdentifier from './components/InstanceIdentifier.vue';
 import Directory from './components/Directory.vue';
 import Viewer from './components/Viewer.vue';
 import Games from './components/Games.vue';
+import FullscreenGraph from './components/FullscreenGraph.vue';
 
 import {capitalize, removeExtension} from './filters';
 
@@ -36,6 +37,11 @@ const routes = [
     {
         path: '/',
         component: Games,
+    },
+    {
+        path: '/view/:game/:path*.json/graph',
+        component: FullscreenGraph,
+        props: true,
     },
     {
         path: '/view/:game/:path*.json',
