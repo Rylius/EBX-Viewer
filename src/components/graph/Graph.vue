@@ -55,7 +55,7 @@ export default Vue.extend({
         instanceNodes: { [guid: string]: Node; },
         instanceInputs: { [guid: string]: { [key: string]: Input }; },
         instanceOutputs: { [guid: string]: { [key: string]: Output }; },
-        connections: Array<{ output: Output, input: Input }>,
+        queuedConnections: Array<{ output: Output, input: Input }>,
         selectedNodes: Array<Node>,
     } {
         return {
@@ -70,7 +70,7 @@ export default Vue.extend({
             instanceNodes: {},
             instanceInputs: {},
             instanceOutputs: {},
-            connections: [],
+            queuedConnections: [],
             selectedNodes: [],
         };
     },
@@ -88,9 +88,10 @@ export default Vue.extend({
         cytoscape.use(dagre);
         cytoscape.use(klay);
 
-        this.cy = cytoscape({
+        const cy = cytoscape({
             headless: true,
         });
+        this.cy = cy;
 
         const editor = new Rete.NodeEditor(`ebx-graph-viewer@1.0.0`, editorElement);
         this.editor = editor;
@@ -153,6 +154,21 @@ export default Vue.extend({
                 }
             }
         }
+
+        // We need to wait for the socket elements to be created
+        setTimeout(() => {
+            this.queuedConnections.forEach(({output, input}) => {
+                editor.connect(output, input);
+                cy.add({
+                    group: 'edges',
+                    data: {
+                        id: `${output.key}-to-${input.key}`,
+                        source: output.node?.data.id as string,
+                        target: input.node?.data.id as string,
+                    },
+                });
+            });
+        }, 0);
 
         if (this.partition.primaryInstance) {
             const node = this.instanceNodes[this.partition.primaryInstance.guid];
@@ -318,21 +334,7 @@ export default Vue.extend({
         },
 
         connect(output: Output, input: Input): void {
-            setTimeout(() => {
-                if (!this.editor || !this.cy) {
-                    throw new Error('Cannot connect nodes without editor or cytoscape core');
-                }
-
-                this.editor.connect(output, input);
-                this.cy.add({
-                    group: 'edges',
-                    data: {
-                        id: `${output.key}-to-${input.key}`,
-                        source: output.node?.data.id as string,
-                        target: input.node?.data.id as string,
-                    },
-                });
-            }, 0);
+            this.queuedConnections.push({output, input});
         },
 
         async createInterfaceDescriptor(reference: Reference): Promise<void> {
