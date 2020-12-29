@@ -290,13 +290,14 @@ export default Vue.extend({
             return instance;
         },
 
-        prepareNode(instance: Instance, usage: 'input' | 'output'): Node {
+        prepareNode(instance: Instance, usage: 'source' | 'target'): Node {
             let id = instance.guid;
             if (instance.type === 'InterfaceDescriptorData') {
                 // Split interface descriptors into two separate nodes
-                if (usage === 'input') {
+
+                if (usage === 'source') {
                     id += '-inputs';
-                } else if (usage === 'output') {
+                } else if (usage === 'target') {
                     id += '-outputs';
                 }
             }
@@ -343,31 +344,31 @@ export default Vue.extend({
                 throw new Error(`Invalid interface descriptor type '${instance.type}'`);
             }
 
-            const inputsNode = this.prepareNode(instance, 'input');
-            const outputsNode = this.prepareNode(instance, 'output');
+            const inputsNode = this.prepareNode(instance, 'source');
+            const outputsNode = this.prepareNode(instance, 'target');
 
             for (const inputEvent of instance.fields.inputEvents.value) {
                 const eventId = inputEvent.value.id.value;
-                const key = `event-input-${instance.guid}-${eventId}`;
-                this.prepareInput(inputsNode, key, `${this.resolveHash(eventId)}`, this.sockets.event);
+                const key = `event-output-${instance.guid}-${eventId}`;
+                this.prepareOutput(inputsNode, key, `${this.resolveHash(eventId)}`, this.sockets.event);
             }
 
             for (const outputEvent of instance.fields.outputEvents.value) {
                 const eventId = outputEvent.value.id.value;
-                const key = `event-output-${instance.guid}-${eventId}`;
-                this.prepareOutput(outputsNode, key, `${this.resolveHash(eventId)}`, this.sockets.event);
+                const key = `event-input-${instance.guid}-${eventId}`;
+                this.prepareInput(outputsNode, key, `${this.resolveHash(eventId)}`, this.sockets.event);
             }
 
             for (const inputLink of instance.fields.inputLinks.value) {
                 const fieldId = inputLink.value.id.value;
                 const key = `link-input-${instance.guid}-${fieldId}`;
-                this.prepareInput(inputsNode, key, `${this.resolveHash(fieldId)}`, this.sockets.link);
+                this.prepareInput(outputsNode, key, `${this.resolveHash(fieldId)}`, this.sockets.link);
             }
 
             for (const outputLink of instance.fields.outputLinks.value) {
                 const fieldId = outputLink.value.id.value;
                 const key = `link-output-${instance.guid}-${fieldId}`;
-                this.prepareOutput(outputsNode, key, `${this.resolveHash(fieldId)}`, this.sockets.link);
+                this.prepareOutput(inputsNode, key, `${this.resolveHash(fieldId)}`, this.sockets.link);
             }
 
             for (const field of instance.fields.fields.value) {
@@ -376,10 +377,10 @@ export default Vue.extend({
                 const source = field.value.accessType.enumValue === 'FieldAccessType_Source' || sourceAndTarget;
                 const target = field.value.accessType.enumValue === 'FieldAccessType_Target' || sourceAndTarget;
                 if (target) {
-                    this.prepareOutput(outputsNode, `property-output-${instance.guid}-${fieldId}`, `${this.resolveHash(fieldId)}`, this.sockets.property);
+                    this.prepareOutput(inputsNode, `property-output-${instance.guid}-${fieldId}`, `${this.resolveHash(fieldId)}`, this.sockets.property);
                 }
                 if (source) {
-                    this.prepareInput(inputsNode, `property-input-${instance.guid}-${fieldId}`, `${this.resolveHash(fieldId)}`, this.sockets.property);
+                    this.prepareInput(outputsNode, `property-input-${instance.guid}-${fieldId}`, `${this.resolveHash(fieldId)}`, this.sockets.property);
                 }
                 if (!source && !target) {
                     console.warn('Unhandled interface descriptor field', field.value);
@@ -389,13 +390,13 @@ export default Vue.extend({
 
         async createEventConnection(eventConnection: Field<any>): Promise<void> {
             const sourceInstance = await this.resolveInstance(eventConnection.value.source.value);
-            const sourceNode = this.prepareNode(sourceInstance, 'output');
+            const sourceNode = this.prepareNode(sourceInstance, 'source');
             const sourceEvent = eventConnection.value.sourceEvent.value.id.value;
             const sourceKey = `event-output-${sourceInstance.guid}-${sourceEvent}`;
             const output = this.prepareOutput(sourceNode, sourceKey, `${this.resolveHash(sourceEvent)}`, this.sockets.event);
 
             const targetInstance = await this.resolveInstance(eventConnection.value.target.value);
-            const targetNode = this.prepareNode(targetInstance, 'input');
+            const targetNode = this.prepareNode(targetInstance, 'target');
             const targetEvent = eventConnection.value.targetEvent.value.id.value;
             const targetKey = `event-input-${targetInstance.guid}-${targetEvent}`;
             const input = this.prepareInput(targetNode, targetKey, `${this.resolveHash(targetEvent)}`, this.sockets.event);
@@ -405,13 +406,13 @@ export default Vue.extend({
 
         async createPropertyConnection(propertyConnection: Field<any>): Promise<void> {
             const sourceInstance = await this.resolveInstance(propertyConnection.value.source.value);
-            const sourceNode = this.prepareNode(sourceInstance, 'output');
+            const sourceNode = this.prepareNode(sourceInstance, 'source');
             const sourceField = propertyConnection.value.sourceFieldId.value;
             const sourceKey = `property-output-${sourceInstance.guid}-${sourceField}`;
             const output = this.prepareOutput(sourceNode, sourceKey, `${this.resolveHash(sourceField)}`, this.sockets.property);
 
             const targetInstance = await this.resolveInstance(propertyConnection.value.target.value);
-            const targetNode = this.prepareNode(targetInstance, 'input');
+            const targetNode = this.prepareNode(targetInstance, 'target');
             const targetField = propertyConnection.value.targetFieldId.value;
             const targetKey = `property-input-${targetInstance.guid}-${targetField}`;
             const input = this.prepareInput(targetNode, targetKey, `${this.resolveHash(targetField)}`, this.sockets.property);
@@ -420,14 +421,16 @@ export default Vue.extend({
         },
 
         async createLinkConnection(linkConnection: Field<any>): Promise<void> {
+            // We're reversing the direction of link connections, so mapping source to target is correct here
+
             const sourceInstance = await this.resolveInstance(linkConnection.value.source.value);
-            const sourceNode = this.prepareNode(sourceInstance, 'input');
+            const sourceNode = this.prepareNode(sourceInstance, 'target');
             const sourceField = linkConnection.value.sourceFieldId.value;
             const sourceKey = `link-input-${sourceInstance.guid}-${sourceField}`;
             const input = this.prepareInput(sourceNode, sourceKey, `${this.resolveHash(sourceField)}`, this.sockets.link);
 
             const targetInstance = await this.resolveInstance(linkConnection.value.target.value);
-            const targetNode = this.prepareNode(targetInstance, 'output');
+            const targetNode = this.prepareNode(targetInstance, 'source');
             const targetField = linkConnection.value.targetFieldId.value;
             const targetKey = `link-output-${targetInstance.guid}-${targetField}`;
             const output = this.prepareOutput(targetNode, targetKey, `${this.resolveHash(targetField)}`, this.sockets.link);
