@@ -58,6 +58,8 @@ import Socket from './Socket.vue';
 import CompareNode from './CompareNode.vue';
 import LogicNode from './LogicNode.vue';
 import MathOpNode from './MathOpNode.vue';
+import DelayNode from './DelayNode.vue';
+import RandomDelayNode from './RandomDelayNode.vue';
 import SettingNode from './SettingNode.vue';
 
 const simpleValueTypes = [
@@ -98,6 +100,10 @@ export default Vue.extend({
                 return CompareNode;
             } else if (this.instance.type === 'MathOpEntityData') {
                 return MathOpNode;
+            } else if (this.instance.type === 'DelayEntityData') {
+                return DelayNode;
+            } else if (this.instance.type === 'RandomDelayEntityData') {
+                return RandomDelayNode;
             } else if (this.instance.type === 'SettingEntityData') {
                 return SettingNode;
             } else if (logicTypes.indexOf(this.instance.type) >= 0) {
