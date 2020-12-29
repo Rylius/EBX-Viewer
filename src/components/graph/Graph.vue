@@ -168,6 +168,8 @@ export default Vue.extend({
                     },
                 });
             });
+
+            setTimeout(() => this.layout(), 0);
         }, 0);
 
         if (this.partition.primaryInstance) {
