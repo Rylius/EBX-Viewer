@@ -171,7 +171,7 @@ export default Vue.extend({
   }
 
   &.selected {
-    background-color: lighten(#414141, 5%);
+    background-color: lighten($node-background-color, 10%);
   }
 
 }

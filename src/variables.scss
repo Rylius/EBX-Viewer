@@ -39,12 +39,14 @@ $section-padding: 1.5rem;
 
 // Graph
 
-$node-background-color: #2d2d2d;
+$graph-background-color: $footer-background-color;
+
+$node-background-color: #3c3c3c;
 $node-border-color: #1a1a1a;
 
 $connection-color: #131313;
-$connection-event-color: #940000;
-$connection-property-color: #004c88;
+$connection-event-color: #ae0000;
+$connection-property-color: #005a9f;
 $connection-link-color: #ffc62f;
 
 $node-foreign-partition-color: #371e13;

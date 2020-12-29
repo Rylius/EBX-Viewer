@@ -458,10 +458,7 @@ export default Vue.extend({
 
 <style lang="scss">
 
-$connection-color: #131313;
-$connection-event-color: #940000;
-$connection-property-color: #004c88;
-$connection-link-color: #ffc62f;
+@import "/src/variables";
 
 .graph-container {
   width: 100%;
@@ -473,7 +470,7 @@ $connection-link-color: #ffc62f;
   height: 100%;;
   position: absolute;
 
-  background-color: #7A7A7A;
+  background-color: $graph-background-color;
 
   .connection {
     .main-path {
