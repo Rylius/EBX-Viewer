@@ -256,7 +256,7 @@ export default Vue.extend({
                         const pos = element.position();
 
                         editor.view.nodes.get(node)?.translate(pos.x, pos.y);
-                        editor.view.updateConnections({node});
+                        setTimeout(() => editor.view.updateConnections({node}), 0);
                     });
                     console.log('Layout updated');
                 },
