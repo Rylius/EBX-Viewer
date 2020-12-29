@@ -30,6 +30,7 @@ import Partition from '../../ebx/Partition';
 import InstanceComponent from './InstanceComponent';
 
 import events from '../../../data/eventHashes.json';
+import interfaceIds from '../../../data/interfaceIDs.json';
 import Field from '../../ebx/Field';
 import Instance from '../../ebx/Instance';
 import GameRegistry from '../../GameRegistry';
@@ -382,11 +383,14 @@ export default Vue.extend({
                 const sourceAndTarget = field.value.accessType.enumValue === 'FieldAccessType_SourceAndTarget';
                 const source = field.value.accessType.enumValue === 'FieldAccessType_Source' || sourceAndTarget;
                 const target = field.value.accessType.enumValue === 'FieldAccessType_Target' || sourceAndTarget;
+                const resolvedFieldHash = this.resolveHash(fieldId);
                 if (target) {
-                    this.prepareOutput(inputsNode, `property-output-${instance.guid}-${fieldId}`, `${this.resolveHash(fieldId)}`, this.sockets.property);
+                    const value = (interfaceIds as { [hash: string]: string; })[fieldId];
+                    const title = value ? `${value} - ${resolvedFieldHash}` : resolvedFieldHash;
+                    this.prepareOutput(inputsNode, `property-output-${instance.guid}-${fieldId}`, title, this.sockets.property);
                 }
                 if (source) {
-                    this.prepareInput(outputsNode, `property-input-${instance.guid}-${fieldId}`, `${this.resolveHash(fieldId)}`, this.sockets.property);
+                    this.prepareInput(outputsNode, `property-input-${instance.guid}-${fieldId}`, `${resolvedFieldHash}`, this.sockets.property);
                 }
                 if (!source && !target) {
                     console.warn('Unhandled interface descriptor field', field.value);
