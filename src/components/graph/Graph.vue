@@ -260,13 +260,14 @@ export default Vue.extend({
             }).run();
         },
 
-        createNode(instance: Instance, id: string): Node {
+        createNode(instance: Instance, id: string, usage: string | null): Node {
             if (!this.editor || !this.cy) {
                 throw new Error('Cannot create nodes without editor or cytoscape core');
             }
 
             const node = new Node('instance');
             node.data.id = id;
+            node.data.usage = usage;
             node.data.instance = instance;
             node.data.sourcePartition = this.partition;
             node.data.registry = this.registry;
@@ -292,6 +293,7 @@ export default Vue.extend({
 
         prepareNode(instance: Instance, usage: 'source' | 'target'): Node {
             let id = instance.guid;
+            let nodeUsage: string | null = null;
             if (instance.type === 'InterfaceDescriptorData') {
                 // Split interface descriptors into two separate nodes
 
@@ -300,6 +302,8 @@ export default Vue.extend({
                 } else if (usage === 'target') {
                     id += '-outputs';
                 }
+
+                nodeUsage = usage;
             }
 
             const node = this.instanceNodes[id];
@@ -307,7 +311,7 @@ export default Vue.extend({
                 return node;
             }
 
-            return this.createNode(instance, id);
+            return this.createNode(instance, id, nodeUsage);
         },
 
         prepareOutput(node: Node, key: string, title: string, socket: Socket): Output {

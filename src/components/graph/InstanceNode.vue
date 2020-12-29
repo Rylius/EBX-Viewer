@@ -12,6 +12,12 @@
             <template v-slot:type>
                 <h3>
                     {{ instance.type }}
+                    <template v-if="node.data.usage === 'target'">
+                        (outputs)
+                    </template>
+                    <template v-else-if="node.data.usage === 'source'">
+                        (inputs)
+                    </template>
                     <br>
                     <instance-identifier :registry="node.data.registry" :instance="instance"
                                          :reference-links="false"></instance-identifier>
