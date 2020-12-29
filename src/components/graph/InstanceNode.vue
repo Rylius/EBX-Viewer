@@ -58,6 +58,7 @@ import Socket from './Socket.vue';
 import CompareNode from './CompareNode.vue';
 import LogicNode from './LogicNode.vue';
 import MathOpNode from './MathOpNode.vue';
+import SettingNode from './SettingNode.vue';
 
 const simpleValueTypes = [
     'BoolEntityData',
@@ -97,6 +98,8 @@ export default Vue.extend({
                 return CompareNode;
             } else if (this.instance.type === 'MathOpEntityData') {
                 return MathOpNode;
+            } else if (this.instance.type === 'SettingEntityData') {
+                return SettingNode;
             } else if (logicTypes.indexOf(this.instance.type) >= 0) {
                 return LogicNode;
             }
