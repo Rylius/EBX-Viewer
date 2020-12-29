@@ -14,7 +14,9 @@
         </div>
 
         <template v-if="input">
-            {{ input.name }}
+            <template v-if="input.socket.name !== 'link' || input.name !== '0'">
+                {{ input.name }}
+            </template>
         </template>
     </div>
 </template>
