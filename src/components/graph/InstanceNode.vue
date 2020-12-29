@@ -1,6 +1,16 @@
 <template>
     <div class="node content"
          :class="[selected(), `type-${instance.type}`, foreignPartition ? 'foreign-partition': '']">
+        <div class="markers">
+            <template v-if="realm && realm !== 'Realm_None'">
+                <div v-if="realm === 'Realm_Client' || realm === 'Realm_ClientAndServer'" :title="realm">
+                    <i class="fas fa-desktop"></i>
+                </div>
+                <div v-if="realm === 'Realm_Server' || realm === 'Realm_ClientAndServer'" :title="realm">
+                    <i class="fas fa-database"></i>
+                </div>
+            </template>
+        </div>
         <component :is="nodeComponent" :node="node" :instance="instance">
             <template v-slot:partition>
                 <p v-if="foreignPartition">
@@ -115,6 +125,13 @@ export default Vue.extend({
         foreignPartition(): boolean {
             return this.partition !== this.node.data.sourcePartition;
         },
+        realm(): string | undefined {
+            if (!this.instance.fields.realm) {
+                return undefined;
+            }
+
+            return this.instance.fields.realm.enumValue;
+        },
     },
     components: {
         Socket,
@@ -125,6 +142,25 @@ export default Vue.extend({
 <style lang="scss">
 
 .node {
+  .markers {
+    position: absolute;
+
+    height: 2.5rem;
+    left: 1rem;
+    right: 1rem;
+    top: -2.5rem;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+
+    font-size: 2rem;
+
+    > *:not(:first-child) {
+      margin-left: 0.5em;
+    }
+  }
+
   h3, h3:not(:first-child) {
     margin-top: 0;
     font-weight: bold;
