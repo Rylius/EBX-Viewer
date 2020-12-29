@@ -386,7 +386,7 @@ export default Vue.extend({
                 const resolvedFieldHash = this.resolveHash(fieldId);
                 if (target) {
                     const value = (interfaceIds as { [hash: string]: string; })[fieldId];
-                    const title = value ? `${value} - ${resolvedFieldHash}` : resolvedFieldHash;
+                    const title = value ? `${value} - ${resolvedFieldHash}` : `${resolvedFieldHash}`;
                     this.prepareOutput(inputsNode, `property-output-${instance.guid}-${fieldId}`, title, this.sockets.property);
                 }
                 if (source) {
